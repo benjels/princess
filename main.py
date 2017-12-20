@@ -32,6 +32,24 @@ def main():
     config.read('config.ini')
     auth = str(config['DEFAULT']['FACEBOOK_AUTH_TOKEN'])
 
+    session = None
+    try:
+        log("Trying to start Tinder session.")
+        session = pynder.Session(str(config['DEFAULT']['FACEBOOK_ID']), auth)
+    except pynder.errors.RequestError:
+        log("Pynder Error. Trying to get new auth.")
+        auth = get_access_token(str(config['DEFAULT']['FB_EMAIL']), str(config['DEFAULT']['FB_PASSWORD']), str(config['DEFAULT']['MOBILE_USER_AGENT']), str(config['DEFAULT']['FB_AUTH']))
+        config['DEFAULT']['FACEBOOK_AUTH_TOKEN'] = auth
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+        config.read('config.ini')
+        try:
+            session = pynder.Session(str(config['DEFAULT']['FACEBOOK_ID']), auth)
+        except pynder.errors.RequestError:
+            log("Pynder Error. New auth did NOT work.")
+            quit()
+
+
 
 
 
